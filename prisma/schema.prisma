@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(120)
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(150)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(150)
+  description String?
+  image       String?
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  categoryId  Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  variants    Variant[]
+}
+
+model Variant {
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(150)
+  material     String?
+  textureImage String?
+  product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  productId    Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  images       VariantImage[]
+}
+
+model VariantImage {
+  id        Int      @id @default(autoincrement())
+  image     String?
+  variant   Variant? @relation(fields: [variantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  variantId Int?
+}
